@@ -14,7 +14,7 @@ void timer2_isr(void) __interrupt(5)
 
 __sfr __at (0xC9) T2MOD;
 
-void main(void)
+void init_timer2(void)
 {
     /* Configure timer 2 as auto-reload mode */
     T2MOD |= 0x01; // DCEN
@@ -34,6 +34,32 @@ void main(void)
 
     /* Enable the timer2 */
     TR2 |= 0x01;
+}
+
+__sfr __at (0xC3) SPCON;
+__bit __at (0xB3) ESPI;
+
+void init_spi(void)
+{
+    /* Default to :
+     * FCLK / 2
+     * MASTER
+     * SS Enabled
+     * CPOL - CPHA to 0
+     * */
+    ESPI= 1; // Set SPI interrupt
+    SPCON |= 0x40; // Enable SPI interface
+}
+
+void send_spi_data(void)
+{
+
+}
+
+void main(void)
+{
+    init_timer2();
+    init_spi();
 
     while(1)
     {}
