@@ -1,35 +1,41 @@
-#include <8051.h>
+#include <8052.h>
 
-/*
- * Simple delay loop
- * This is NOT accurate timing, just a busy wait
- */
-void delay_ms(unsigned int ms)
+void timer2_isr(void) __interrupt(5)
 {
-    unsigned int i, j;
-    for (i = 0; i < ms; i++)
+    if (P1_0 == 1)
     {
-        for (j = 0; j < 120; j++)
-        {
-            __asm
-                nop
-            __endasm;
-        }
+        P1_0 &= ~0x01;
+    }
+    else
+    {
+        P1_0 |= 0x01;
     }
 }
 
+__sfr __at (0xC9) T2MOD;
+
 void main(void)
 {
-    // Configure P1.0 as output (8051 ports are quasi-bidirectional)
-    P1_0 = 0;
+    /* Configure timer 2 as auto-reload mode */
+    T2MOD |= 0x01; // DCEN
+    RCAP2H = 0x00;
+    RCAP2L = 0xFF;
 
-    while (1)
-    {
-        P1_0 = 1;      // LED ON
-        delay_ms(500);
+    TH2 = 0xFF;
+    TL2 = 0xFF;
 
-        P1_0 = 0;      // LED OFF
-        delay_ms(500);
-    }
+    /* Clear overflow/underflow bits */
+    TF2 &= ~0x01;
+    EXF2 &= ~0x01;
+
+    /* Enable timer2 interrupt */
+    EA = 1;
+    ET2 |= 0x01;
+
+    /* Enable the timer2 */
+    TR2 |= 0x01;
+
+    while(1)
+    {}
 }
 
