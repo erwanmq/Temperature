@@ -1,25 +1,65 @@
 #include <8052.h>
 
+__sfr __at (0xC9) T2MOD;
+
+__sfr __at (0xC3) SPCON;
+__bit __at (0xB3) ESPI;
+__sfr __at (0xC4) SPSTA;
+__sfr __at (0xC5) SPDAT;
+
+
+static volatile unsigned int counter = 0;
 void timer2_isr(void) __interrupt(5)
 {
-    if (P1_0 == 1)
+    TR2 &= ~0x01;
+    counter++;
+    TF2 &= ~0x01;
+
+    TR2 |= 0x01;
+}
+
+typedef enum SpiStatus
+{
+    STATUS_OK,
+    STATUS_MODF,
+    STATUS_WCOL,
+    STATUS_OC,
+    STATUS_SSERR,
+} en_spi_status;
+
+static volatile en_spi_status spi_status = STATUS_OK;
+void spi_isr(void) __interrupt(9)
+{
+    unsigned char spsta = SPSTA;
+
+    if (spsta & 0x80)
     {
-        P1_0 &= ~0x01;
+        spi_status = STATUS_OK;
     }
-    else
+
+    if (spsta & 0x40)
     {
-        P1_0 |= 0x01;
+        spi_status = STATUS_WCOL;
+    }
+
+    if (spsta & 0x20)
+    {
+        spi_status = STATUS_SSERR;
+    }
+
+    if (spsta & 0x10)
+    {
+       spi_status = STATUS_MODF; 
     }
 }
 
-__sfr __at (0xC9) T2MOD;
 
 void init_timer2(void)
 {
     /* Configure timer 2 as auto-reload mode */
     T2MOD |= 0x01; // DCEN
-    RCAP2H = 0x00;
-    RCAP2L = 0xFF;
+    RCAP2H = 0x5D;
+    RCAP2L = 0x3C;
 
     TH2 = 0xFF;
     TL2 = 0xFF;
@@ -29,15 +69,11 @@ void init_timer2(void)
     EXF2 &= ~0x01;
 
     /* Enable timer2 interrupt */
-    EA = 1;
     ET2 |= 0x01;
-
+    
     /* Enable the timer2 */
     TR2 |= 0x01;
 }
-
-__sfr __at (0xC3) SPCON;
-__bit __at (0xB3) ESPI;
 
 void init_spi(void)
 {
@@ -53,15 +89,30 @@ void init_spi(void)
 
 void send_spi_data(void)
 {
-
+    SPDAT = 0b10010110;
 }
 
 void main(void)
 {
+    EA = 1; // Enable interrupts
     init_timer2();
-    init_spi();
+    //init_spi();
+    //send_spi_data();
 
     while(1)
-    {}
+    {
+        if (counter >= 100)
+        {
+            if (P1_0 == 1)
+            {
+                P1_0 &= ~0x01;
+            }
+            else
+            {
+                P1_0 |= 0x01;
+            }
+            counter = 0;
+        }
+    }
 }
 
