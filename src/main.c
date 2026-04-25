@@ -1,6 +1,6 @@
 #include <8052.h>
+#include "timer/timer2.h"
 
-__sfr __at (0xC9) T2MOD;
 
 __sfr __at (0xC3) SPCON;
 __sfr __at (0xB1) IEN1; // Interrupt Enable Register
@@ -8,16 +8,6 @@ __sfr __at (0xC4) SPSTA;
 __sfr __at (0xC5) SPDAT;
 
 
-static volatile unsigned int counter = 0;
-void timer2_isr(void) __interrupt(5)
-{
-    TR2 &= ~0x01;
-
-    counter++;
-    TF2 &= ~0x01;
-
-    TR2 |= 0x01;
-}
 
 typedef enum SpiStatus
 {
@@ -26,55 +16,35 @@ typedef enum SpiStatus
     STATUS_WCOL,
     STATUS_OC,
     STATUS_SSERR,
+    STATUS_NO_DATA,
 } en_spi_status;
 
-//static volatile en_spi_status spi_status = STATUS_OK;
-//void spi_isr(void) __interrupt(9)
-//{
-//    unsigned char spsta = SPSTA;
-//
-//    if (spsta & 0x80)
-//    {
-//        spi_status = STATUS_OK;
-//    }
-//
-//    if (spsta & 0x40)
-//    {
-//        spi_status = STATUS_WCOL;
-//    }
-//
-//    if (spsta & 0x20)
-//    {
-//        spi_status = STATUS_SSERR;
-//    }
-//
-//    if (spsta & 0x10)
-//    {
-//       spi_status = STATUS_MODF; 
-//    }
-//}
-
-
-void init_timer2(void)
+static volatile en_spi_status spi_status = STATUS_NO_DATA;
+void spi_isr(void) __interrupt(9)
 {
-    /* Configure timer 2 as auto-reload mode */
-    T2MOD |= 0x01; // DCEN
-    RCAP2H = 0x5D;
-    RCAP2L = 0x3C;
+    unsigned char spsta = SPSTA;
 
-    TH2 = 0xFF;
-    TL2 = 0xFF;
+    if (spsta & 0x80)
+    {
+        spi_status = STATUS_OK;
+    }
 
-    /* Clear overflow/underflow bits */
-    TF2 &= ~0x01;
-    EXF2 &= ~0x01;
+    if (spsta & 0x40)
+    {
+        spi_status = STATUS_WCOL;
+    }
 
-    /* Enable timer2 interrupt */
-    ET2 |= 0x01;
-    
-    /* Enable the timer2 */
-    TR2 |= 0x01;
+    if (spsta & 0x20)
+    {
+        spi_status = STATUS_SSERR;
+    }
+
+    if (spsta & 0x10)
+    {
+       spi_status = STATUS_MODF; 
+    }
 }
+
 
 void init_spi(void)
 {
@@ -99,23 +69,25 @@ void send_spi_data(void)
 void main(void)
 {
     EA = 1; // Enable interrupts
-    init_timer2();
+    timer2_init(100, 100);
     init_spi();
 
+    send_spi_data();
     while(1)
     {
-        if (counter >= 100)
+        spi_status = STATUS_OK;
+        switch (spi_status)
         {
-            if (P1_0 == 1)
-            {
-                P1_0 &= ~0x01;
-                send_spi_data();
-            }
-            else
-            {
-                P1_0 |= 0x01;
-            }
-            counter = 0;
+            case STATUS_OK:
+                timer2_change_counter_max(1000);
+                timer2_start_timer();
+                spi_status = STATUS_NO_DATA;
+                break;
+        }
+        if (timer2_get_flag())
+        {
+            P1_0 = !P1_0;
+            timer2_reset_flag();
         }
     }
 }
