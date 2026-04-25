@@ -1,6 +1,11 @@
 #ifndef TIMER2_H__
 #define TIMER2_H__
 
+typedef struct 
+{
+
+} st_timer2_flags;
+
 void timer2_isr(void) __interrupt(5);
 void timer2_init(unsigned int freq, unsigned int flag_counter);
 volatile __bit timer2_get_flag(void);
