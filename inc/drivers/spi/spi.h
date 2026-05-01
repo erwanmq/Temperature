@@ -14,6 +14,8 @@ typedef enum SpiStatus
 
 void spi_isr(void) __interrupt(9);
 void spi_init(void);
+void spi_reset_flag(void);
+__bit spi_get_flag(void);
 void spi_send_data(unsigned char data);
 unsigned char spi_read_data(void);
 en_spi_status spi_get_status(void);

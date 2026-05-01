@@ -10,9 +10,46 @@ __sfr __at (0xB1) IEN1; // Interrupt Enable Register
 __sfr __at (0xC4) SPSTA;
 __sfr __at (0xC5) SPDAT;
 
-static volatile en_spi_status spi_status = STATUS_NO_DATA;
+
+static volatile __bit spi_flag = 0;
 void spi_isr(void) __interrupt(9)
 {
+    spi_flag = 1;
+}
+
+
+void spi_init(void)
+{
+    // Master mode, FCLK/2, Mode 0
+    SPCON = 0x30; 
+    
+    IEN1 |= 0x04; // Set SPI interrupt
+    SPCON |= 0x40; // Enable SPI
+}
+
+__bit spi_get_flag(void)
+{
+    return spi_flag;
+}
+
+void spi_reset_flag(void)
+{
+    spi_flag = 0;
+}
+
+void spi_send_data(unsigned char data)
+{
+    SPDAT = data;
+}
+
+unsigned char spi_read_data(void)
+{
+    return SPDAT;
+}
+
+en_spi_status spi_get_status(void)
+{
+    en_spi_status spi_status = STATUS_NO_DATA;
     unsigned char spsta = SPSTA;
 
     if (spsta & 0x80)
@@ -34,30 +71,6 @@ void spi_isr(void) __interrupt(9)
     {
        spi_status = STATUS_MODF; 
     }
-}
-
-
-void spi_init(void)
-{
-    // Master mode, FCLK/2, Mode 0
-    SPCON = 0x30; 
-    
-    IEN1 |= 0x04; // Set SPI interrupt
-    SPCON |= 0x40; // Enable SPI
-}
-
-void spi_send_data(unsigned char data)
-{
-    SPDAT = data;
-}
-
-unsigned char spi_read_data(void)
-{
-    return SPDAT;
-}
-
-en_spi_status spi_get_status(void)
-{
     return spi_status;
 }
 
