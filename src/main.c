@@ -24,7 +24,7 @@ typedef enum Error
 void main(void)
 {
     EA = 1; // Enable interrupts
-    timer2_init(TIMER_FREQ); 
+    timer2_init(TIMER_FREQ);
     spi_init();
 
     timer2_start_timer();
@@ -52,11 +52,11 @@ void main(void)
                     counter++;
                     if (counter >= TIMER_MAX_COUNTER)
                     {
-                        current_state = STATE_TEMPERATURE;      
+                        current_state = STATE_TEMPERATURE;
                         counter = 0;
                     }
                 }
-                else 
+                else
                 {
                 }
 
@@ -66,39 +66,58 @@ void main(void)
                 {
                     if (STATUS_MODF == spi_status)
                     {
-                       // Do nothing 
+                       // Do nothing
                     }
                 }
                 break;
 
             case STATE_TEMPERATURE:
-                spi_send_data(0x55);
-                
-                // Enter idle mode until next interrupt
-                sleep_enter_idle_mode();
+                /* 1 : start bit
+                 * 0: single ended - 1: differential input mode
+                 * 0: D0
+                 * 0: D1
+                 * 0: D2 -> All 0 == CH0
+                 */
+                spi_enter_spi_mode();
+                unsigned short temperature = 0xFFFF;
+                for (int i = 2; i >= 0; i--)
+                {
+                    spi_send_data(0b00000001);
+                    // Enter idle mode until next interrupt
+                    sleep_enter_idle_mode();
 
-                __bit spi_flag = spi_get_flag();
-                if (1 == spi_flag)
-                {
-                    spi_status = spi_get_status();
-                    if (STATUS_OK != spi_status)
+                    __bit spi_flag = spi_get_flag();
+                    if (1 == spi_flag)
                     {
-                        error = ERROR_SPI;
-                        current_state = STATE_ERROR;
+                        spi_status = spi_get_status();
+                        if (STATUS_OK != spi_status)
+                        {
+                            error = ERROR_SPI;
+                            current_state = STATE_ERROR;
+                        }
+                        else
+                        {
+                            temperature = (spi_read_data() << (8 * i));
+                        }
+                        spi_reset_flag();
                     }
-                    else 
+                    else
                     {
-                        unsigned char temp = spi_read_data(); // Don't use it
                     }
-                    spi_reset_flag();
                 }
-                else
+
+                spi_exit_spi_mode();
+
+                temperature &= ~0xFC00; // Clear 6 first bits
+                for (int i = 0; i < 16; i++)
                 {
+                    P1_0 = (temperature >> i) & 1;
                 }
+                current_state = STATE_IDLE;
 
                 break;
         }
-        
+
     }
 }
 

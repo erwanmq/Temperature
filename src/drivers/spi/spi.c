@@ -10,10 +10,15 @@ __sfr __at (0xB1) IEN1; // Interrupt Enable Register
 __sfr __at (0xC4) SPSTA;
 __sfr __at (0xC5) SPDAT;
 
-
 static volatile __bit spi_flag = 0;
+static volatile __bit active_flag = 0;
 void spi_isr(void) __interrupt(9)
 {
+    if (0 == active_flag)
+    {
+        // CS goes high only if we don't stay active
+        P1_2 = 1;
+    }
     spi_flag = 1;
 }
 
@@ -39,7 +44,23 @@ void spi_reset_flag(void)
 
 void spi_send_data(unsigned char data)
 {
+    // Make CS low
+    P1_2 = 0;
     SPDAT = data;
+}
+
+void spi_enter_spi_mode(void)
+{
+    // Make CS low
+    P1_2 = 0;
+    active_flag = 1;
+}
+
+void spi_exit_spi_mode(void)
+{
+    // Make CS high
+    P1_2 = 1;
+    active_flag = 0;
 }
 
 unsigned char spi_read_data(void)
