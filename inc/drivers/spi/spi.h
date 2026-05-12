@@ -19,7 +19,7 @@ __bit spi_get_flag(void);
 void spi_send_data(unsigned char data);
 unsigned char spi_read_data(void);
 en_spi_status spi_get_status(void);
-void spi_exit_spi_mode(void);
-void spi_enter_spi_mode(void);
+void spi_set_SS_high(void);
+void spi_set_SS_low(void);
 
 #endif /* SPI_H__ */

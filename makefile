@@ -10,7 +10,8 @@ BUILD_DIR = build
 SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/drivers/timer/timer2.c \
        $(SRC_DIR)/drivers/spi/spi.c \
-       $(SRC_DIR)/drivers/sleep/sleep.c 
+       $(SRC_DIR)/drivers/sleep/sleep.c \
+       $(SRC_DIR)/application/FSM.c 
 
 # Object files (.rel)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.rel)

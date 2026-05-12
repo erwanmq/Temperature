@@ -49,16 +49,16 @@ void spi_send_data(unsigned char data)
     SPDAT = data;
 }
 
-void spi_enter_spi_mode(void)
+void spi_set_SS_low(void)
 {
-    // Make CS low
+    // Make SS low
     P1_2 = 0;
     active_flag = 1;
 }
 
-void spi_exit_spi_mode(void)
+void spi_set_SS_high(void)
 {
-    // Make CS high
+    // Make SS high
     P1_2 = 1;
     active_flag = 0;
 }

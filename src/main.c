@@ -2,6 +2,7 @@
 #include "drivers/timer/timer2.h"
 #include "drivers/sleep/sleep.h"
 #include "drivers/spi/spi.h"
+#include "application/FSM.h"
 
 
 #define TIMER_FREQ 100 // 100Hz -- 10ms resolution
@@ -30,93 +31,78 @@ void main(void)
     timer2_start_timer();
     unsigned char counter = 0;
 
-    en_state current_state = STATE_IDLE;
-    en_spi_status spi_status = STATUS_OK;
-    en_error error = ERROR_NO_ERR;
+    st_fsm_context FSM_ctx = {
+        .current_state = FSM_STATE_IDLE,
+    };
+
+    //en_state current_state = STATE_IDLE;
+    //en_spi_status spi_status = STATUS_OK;
+    //en_error error = ERROR_NO_ERR;
     while(1)
     {
-        switch (current_state)
-        {
-            case STATE_IDLE:
-                timer2_reset_flag();
+        FSM_update(&FSM_ctx);
+       // switch (current_state)
+       // {
+       //     case STATE_IDLE:
 
-                // Enter idle mode until next interrupt
-                sleep_enter_idle_mode();
-                // The CPU sleep here until next interrupt
-                P1_0 = !P1_0;
+       //         P1_0 = !P1_0;
 
 
-                __bit timer2_flag = timer2_get_flag();
-                if (1 == timer2_flag)
-                {
-                    counter++;
-                    if (counter >= TIMER_MAX_COUNTER)
-                    {
-                        current_state = STATE_TEMPERATURE;
-                        counter = 0;
-                    }
-                }
-                else
-                {
-                }
+       //         break;
 
-                break;
-            case STATE_ERROR:
-                if (ERROR_SPI == error)
-                {
-                    if (STATUS_MODF == spi_status)
-                    {
-                       // Do nothing
-                    }
-                }
-                break;
+       //     case STATE_ERROR:
+       //         if (ERROR_SPI == error)
+       //         {
+       //             if (STATUS_MODF == spi_status)
+       //             {
+       //                // Do nothing
+       //             }
+       //         }
+       //         break;
 
-            case STATE_TEMPERATURE:
-                /* 1 : start bit
-                 * 0: single ended - 1: differential input mode
-                 * 0: D0
-                 * 0: D1
-                 * 0: D2 -> All 0 == CH0
-                 */
-                spi_enter_spi_mode();
-                unsigned short temperature = 0xFFFF;
-                for (int i = 2; i >= 0; i--)
-                {
-                    spi_send_data(0b00000001);
-                    // Enter idle mode until next interrupt
-                    sleep_enter_idle_mode();
+       //     case STATE_TEMPERATURE:
+       //         /* 1 : start bit
+       //          * 0: single ended - 1: differential input mode
+       //          * 0: D0
+       //          * 0: D1
+       //          * 0: D2 -> All 0 == CH0
+       //          */
+       //         spi_enter_spi_mode();
+       //         unsigned short temperature = 0xFFFF;
+       //         for (int i = 2; i >= 0; i--)
+       //         {
+       //             spi_send_data(0b00000001);
+       //             // Enter idle mode until next interrupt
+       //             sleep_enter_idle_mode();
 
-                    __bit spi_flag = spi_get_flag();
-                    if (1 == spi_flag)
-                    {
-                        spi_status = spi_get_status();
-                        if (STATUS_OK != spi_status)
-                        {
-                            error = ERROR_SPI;
-                            current_state = STATE_ERROR;
-                        }
-                        else
-                        {
-                            temperature = (spi_read_data() << (8 * i));
-                        }
-                        spi_reset_flag();
-                    }
-                    else
-                    {
-                    }
-                }
+       //             __bit spi_flag = spi_get_flag();
+       //             if (1 == spi_flag)
+       //             {
+       //                 spi_status = spi_get_status();
+       //                 if (STATUS_OK != spi_status)
+       //                 {
+       //                     error = ERROR_SPI;
+       //                     current_state = STATE_ERROR;
+       //                 }
+       //                 else
+       //                 {
+       //                     temperature = (spi_read_data() << (8 * i));
+       //                 }
+       //                 spi_reset_flag();
+       //             }
+       //         }
 
-                spi_exit_spi_mode();
+       //         spi_exit_spi_mode();
 
-                temperature &= ~0xFC00; // Clear 6 first bits
-                for (int i = 0; i < 16; i++)
-                {
-                    P1_0 = (temperature >> i) & 1;
-                }
-                current_state = STATE_IDLE;
+       //         temperature &= ~0xFC00; // Clear 6 first bits
+       //         for (int i = 0; i < 16; i++)
+       //         {
+       //             P1_0 = (temperature >> i) & 1;
+       //         }
+       //         current_state = STATE_IDLE;
 
-                break;
-        }
+       //         break;
+       // }
 
     }
 }
