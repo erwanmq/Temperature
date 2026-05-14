@@ -18,9 +18,12 @@ typedef struct FSM_Context
     unsigned char counter;
 
     /* ADC context variables */
-    unsigned char adc_samples;
     unsigned char nb_adc_comm;
     unsigned short adc_value;
+    unsigned char nb_acq;
+
+    /* Calculate mean context variables */
+    unsigned char adc_samples[4];
 } st_fsm_context;
 
 
