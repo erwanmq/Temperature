@@ -8,6 +8,7 @@ void timer2_start_timer(void);
 void timer2_change_freq(unsigned int freq);
 __bit timer2_get_flag(void);
 void timer2_reset_flag(void);
+unsigned char timer2_ms_to_counter(unsigned int ms);
 
 
 #endif /* TIMER2_H__ */

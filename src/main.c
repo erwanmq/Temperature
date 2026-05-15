@@ -18,8 +18,9 @@ void main(void)
 
     timer2_start_timer();
 
-    static st_fsm_context FSM_ctx = {
+    st_fsm_context FSM_ctx = {
         .current_state = FSM_STATE_IDLE,
+        .max_counter = timer2_ms_to_counter(10000), // 10 seconds
     };
 
     unsigned char max_ram_usage = 0;

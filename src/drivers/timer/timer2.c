@@ -7,6 +7,8 @@
 
 __sfr __at (0xC9) T2MOD;
 
+static unsigned char current_freq = 0;
+
 static volatile __bit timer2_flag = 0;
 void timer2_isr(void) __interrupt(5)
 {
@@ -16,6 +18,7 @@ void timer2_isr(void) __interrupt(5)
 
 void timer2_change_freq(unsigned int freq)
 {
+    current_freq = freq;
     unsigned int counter_overflow = 0xFFFF - (CLK_TIMER2 / freq);
     RCAP2H = (unsigned char)((counter_overflow & 0xFF00) >> 8);
     RCAP2L = (unsigned char)(counter_overflow & 0x00FF);
@@ -59,4 +62,9 @@ __bit timer2_get_flag(void)
 void timer2_reset_flag(void)
 {
     timer2_flag = 0;
+}
+
+unsigned char timer2_ms_to_counter(unsigned int ms)
+{
+    return ms * current_freq;
 }

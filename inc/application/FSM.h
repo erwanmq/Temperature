@@ -15,12 +15,14 @@ typedef struct FSM_Context
     en_fsm_state current_state;
 
     /* IDLE context variables */
+    unsigned char max_counter;
     unsigned char counter;
 
     /* ADC context variables */
     unsigned char nb_adc_comm;
     unsigned short adc_value;
     unsigned char nb_acq;
+    unsigned char spi_performed;
 
     /* Calculate mean context variables */
     unsigned char adc_samples[4];
@@ -28,11 +30,6 @@ typedef struct FSM_Context
 
 
 void FSM_update(st_fsm_context* ctx);
-
-void fsm_state_idle(st_fsm_context* ctx);
-void fsm_state_adc_sample(st_fsm_context* ctx);
-void fsm_state_calculate_mean(st_fsm_context* ctx);
-void fsm_state_display(st_fsm_context* ctx);
 
 
 #endif
