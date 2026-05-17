@@ -64,7 +64,7 @@ void timer2_reset_flag(void)
     timer2_flag = 0;
 }
 
-unsigned char timer2_ms_to_counter(unsigned int ms)
+unsigned int timer2_ms_to_counter(unsigned int ms)
 {
-    return ms * current_freq;
+    return ((unsigned long)ms * current_freq) / 1000UL;
 }

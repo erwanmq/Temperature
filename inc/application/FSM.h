@@ -3,7 +3,7 @@
 
 typedef enum FSM_State
 {
-    FSM_STATE_IDLE,
+    FSM_STATE_WAIT,
     FSM_STATE_ADC_SAMPLE,
     FSM_STATE_CALCULATE_MEAN,
     FSM_STATE_DISPLAY,
@@ -13,10 +13,12 @@ typedef enum FSM_State
 typedef struct FSM_Context
 {
     en_fsm_state current_state;
+    en_fsm_state next_state;
 
-    /* IDLE context variables */
-    unsigned char max_counter;
-    unsigned char counter;
+    /* WAIT context variables */
+    unsigned int wait_target;
+    unsigned int wait_counter;
+
 
     /* ADC context variables */
     unsigned char nb_adc_comm;
@@ -29,7 +31,7 @@ typedef struct FSM_Context
 } st_fsm_context;
 
 
-void FSM_update(st_fsm_context* ctx);
+void FSM_update(void);
 
 
 #endif
