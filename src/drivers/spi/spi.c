@@ -22,7 +22,7 @@ void spi_init(void)
 {
     // Master mode, FCLK/2, Mode 0
     SPCON = 0x30; 
-    
+
     IEN1 |= 0x04; // Set SPI interrupt
     SPCON |= 0x40; // Enable SPI
 }

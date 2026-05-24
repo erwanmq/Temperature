@@ -6,6 +6,7 @@
 #include "drivers/timer/timer2.h"
 #include "drivers/sleep/sleep.h"
 #include "drivers/spi/spi.h"
+#include "drivers/external_interrupts/external_interrupts.h"
 
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
 
@@ -112,6 +113,8 @@ static void fsm_state_calculate_mean(void)
 
     mean_sample /= 4;
 
+    ctx.mean_sample = (unsigned char)mean_sample;
+
     /* Send the value to SPI */
     spi_send_data(mean_sample);
 
@@ -120,7 +123,7 @@ static void fsm_state_calculate_mean(void)
 
 static void fsm_state_display(void)
 {
-    // Do nothing
+    fsm_transition_wait(10000, FSM_STATE_ADC_SAMPLE);
 }
 
 void FSM_update(void)
@@ -131,4 +134,11 @@ void FSM_update(void)
         return;
     }
     fsm_callback[ctx.current_state]();
+
+    __bit int1_flag = external_interrupts_get_int1_flag();
+    if (1 == int1_flag)
+    {
+        ctx.current_state = FSM_STATE_DISPLAY;
+        external_interrupts_reset_int1_flag();
+    }
 }

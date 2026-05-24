@@ -2,6 +2,7 @@
 #include "drivers/timer/timer2.h"
 #include "drivers/sleep/sleep.h"
 #include "drivers/spi/spi.h"
+#include "drivers/external_interrupts/external_interrupts.h"
 #include "application/FSM.h"
 #include "utils/stack.h"
 
@@ -15,6 +16,7 @@ void main(void)
     /* Init drivers */
     timer2_init(TIMER_FREQ);
     spi_init();
+    external_interrupts_init_int1();
 
     timer2_start_timer();
 

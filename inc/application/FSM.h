@@ -28,6 +28,7 @@ typedef struct FSM_Context
 
     /* Calculate mean context variables */
     unsigned char adc_samples[4];
+    unsigned char mean_sample;
 } st_fsm_context;
 
 
