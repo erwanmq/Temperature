@@ -148,5 +148,6 @@ void FSM_update(void)
     if (1 == int0_flag)
     {
         external_interrupts_reset_int0_flag();
+        sleep_enter_power_down_mode();
     }
 }
