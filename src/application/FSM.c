@@ -135,10 +135,18 @@ void FSM_update(void)
     }
     fsm_callback[ctx.current_state]();
 
+    /* Used by short press */
     __bit int1_flag = external_interrupts_get_int1_flag();
     if (1 == int1_flag)
     {
         ctx.current_state = FSM_STATE_DISPLAY;
         external_interrupts_reset_int1_flag();
+    }
+
+    /* Used by long press */
+    __bit int0_flag = external_interrupts_get_int0_flag();
+    if (1 == int0_flag)
+    {
+        external_interrupts_reset_int0_flag();
     }
 }
