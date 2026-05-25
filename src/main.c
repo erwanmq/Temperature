@@ -17,6 +17,7 @@ void main(void)
     timer2_init(TIMER_FREQ);
     spi_init();
     external_interrupts_init_int1();
+    external_interrupts_init_int0();
 
     timer2_start_timer();
 
