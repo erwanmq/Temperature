@@ -1,4 +1,4 @@
-#include "drivers/segments_display/segments_display.h"
+#include "drivers/at89c51rb2/segments_display/segments_display.h"
 #include <8052.h>
 
 #define ZERO    126

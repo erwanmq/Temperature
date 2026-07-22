@@ -1,6 +1,6 @@
 #include <8052.h>
 #include "common/clock.h"
-#include "drivers/spi/spi.h"
+#include "drivers/at89c51rb2/spi/spi.h"
 
 
 #define CLK_SPI CLK_PERIPH

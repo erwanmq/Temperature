@@ -8,13 +8,13 @@ BUILD_DIR = build
 
 # Sources
 SRCS = $(SRC_DIR)/main.c \
-       $(SRC_DIR)/drivers/timer/timer2.c \
-       $(SRC_DIR)/drivers/spi/spi.c \
-       $(SRC_DIR)/drivers/sleep/sleep.c \
+       $(SRC_DIR)/drivers/at89c51rb2/timer/timer2.c \
+       $(SRC_DIR)/drivers/at89c51rb2/spi/spi.c \
+       $(SRC_DIR)/drivers/at89c51rb2/sleep/sleep.c \
+       $(SRC_DIR)/drivers/at89c51rb2/external_interrupts/external_interrupts.c \
+       $(SRC_DIR)/drivers/at89c51rb2/segments_display/segments_display.c \
        $(SRC_DIR)/application/FSM.c \
-       $(SRC_DIR)/utils/stack.c \
-       $(SRC_DIR)/drivers/external_interrupts/external_interrupts.c \
-       $(SRC_DIR)/drivers/segments_display/segments_display.c
+       $(SRC_DIR)/utils/stack.c
 
 # Object files (.rel)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.rel)

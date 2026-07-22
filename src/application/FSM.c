@@ -3,11 +3,11 @@
 
 #include "utils/stack.h"
 
-#include "drivers/timer/timer2.h"
-#include "drivers/sleep/sleep.h"
-#include "drivers/spi/spi.h"
-#include "drivers/external_interrupts/external_interrupts.h"
-#include "drivers/segments_display/segments_display.h"
+#include "drivers/at89c51rb2/timer/timer2.h"
+#include "drivers/at89c51rb2/sleep/sleep.h"
+#include "drivers/at89c51rb2/spi/spi.h"
+#include "drivers/at89c51rb2/external_interrupts/external_interrupts.h"
+#include "drivers/at89c51rb2/segments_display/segments_display.h"
 
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
 

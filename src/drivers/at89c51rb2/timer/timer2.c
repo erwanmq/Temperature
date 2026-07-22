@@ -1,6 +1,6 @@
 #include <8052.h>
 #include "common/clock.h"
-#include "drivers/timer/timer2.h"
+#include "drivers/at89c51rb2/timer/timer2.h"
 
 #define PRESCALER_TIMER2        6U
 #define CLK_TIMER2              CLK_PERIPH / PRESCALER_TIMER2

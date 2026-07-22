@@ -1,9 +1,9 @@
 #include <8052.h>
-#include "drivers/timer/timer2.h"
-#include "drivers/sleep/sleep.h"
-#include "drivers/spi/spi.h"
-#include "drivers/external_interrupts/external_interrupts.h"
-#include "drivers/segments_display/segments_display.h"
+#include "drivers/at89c51rb2/timer/timer2.h"
+#include "drivers/at89c51rb2/sleep/sleep.h"
+#include "drivers/at89c51rb2/spi/spi.h"
+#include "drivers/at89c51rb2/external_interrupts/external_interrupts.h"
+#include "drivers/at89c51rb2/segments_display/segments_display.h"
 #include "application/FSM.h"
 #include "utils/stack.h"
 

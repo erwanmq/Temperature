@@ -1,4 +1,4 @@
 
 #define CLOCK_FREQ      10000000U // 10MHz
-#define PRESCALER       2U 
+#define PRESCALER       2U
 #define CLK_PERIPH      CLOCK_FREQ / PRESCALER

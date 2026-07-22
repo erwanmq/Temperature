@@ -1,5 +1,5 @@
 #include <8052.h>
-#include "drivers/external_interrupts/external_interrupts.h"
+#include "drivers/at89c51rb2/external_interrupts/external_interrupts.h"
 
 
 static volatile __bit int0_flag = 0;
