@@ -13,7 +13,8 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/drivers/sleep/sleep.c \
        $(SRC_DIR)/application/FSM.c \
        $(SRC_DIR)/utils/stack.c \
-       $(SRC_DIR)/drivers/external_interrupts/external_interrupts.c
+       $(SRC_DIR)/drivers/external_interrupts/external_interrupts.c \
+       $(SRC_DIR)/drivers/segments_display/segments_display.c
 
 # Object files (.rel)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.rel)

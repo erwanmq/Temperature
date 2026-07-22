@@ -40,7 +40,7 @@ void timer2_init(unsigned int freq)
 {
     /* Configure timer 2 as auto-reload mode */
     T2MOD |= 0x01; // DCEN
-    
+
     timer2_change_freq(freq);
 
     TH2 = 0xFF;

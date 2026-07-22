@@ -3,6 +3,7 @@
 #include "drivers/sleep/sleep.h"
 #include "drivers/spi/spi.h"
 #include "drivers/external_interrupts/external_interrupts.h"
+#include "drivers/segments_display/segments_display.h"
 #include "application/FSM.h"
 #include "utils/stack.h"
 
@@ -18,6 +19,7 @@ void main(void)
     spi_init();
     external_interrupts_init_int1();
     external_interrupts_init_int0();
+    segments_display_init();
 
     timer2_start_timer();
 

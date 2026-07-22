@@ -7,6 +7,7 @@
 #include "drivers/sleep/sleep.h"
 #include "drivers/spi/spi.h"
 #include "drivers/external_interrupts/external_interrupts.h"
+#include "drivers/segments_display/segments_display.h"
 
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
 
@@ -118,12 +119,24 @@ static void fsm_state_calculate_mean(void)
     /* Send the value to SPI */
     spi_send_data(mean_sample);
 
+    static int test_nb = 0;
+    segments_display_write_first_digit(test_nb++);
+    if (test_nb > 9)
+    {
+        test_nb = 0;
+    }
+
     fsm_transition_wait(10000, FSM_STATE_ADC_SAMPLE);
 }
 
 static void fsm_state_display(void)
 {
-    fsm_transition_wait(10000, FSM_STATE_ADC_SAMPLE);
+    //char tens_digit = mean_sample / 10;
+    //char unit_digit = mean_sample - tens_digit;
+    char first = 2;
+    char second = 3;
+    segments_display_write_first_digit(first);
+    segments_display_write_second_digit(second);
 }
 
 void FSM_update(void)
@@ -135,19 +148,19 @@ void FSM_update(void)
     }
     fsm_callback[ctx.current_state]();
 
-    /* Used by short press */
-    __bit int1_flag = external_interrupts_get_int1_flag();
-    if (1 == int1_flag)
-    {
-        ctx.current_state = FSM_STATE_DISPLAY;
-        external_interrupts_reset_int1_flag();
-    }
+    ///* Used by short press */
+    //__bit int1_flag = external_interrupts_get_int1_flag();
+    //if (1 == int1_flag)
+    //{
+    //    ctx.current_state = FSM_STATE_DISPLAY;
+    //    external_interrupts_reset_int1_flag();
+    //}
 
-    /* Used by long press */
-    __bit int0_flag = external_interrupts_get_int0_flag();
-    if (1 == int0_flag)
-    {
-        external_interrupts_reset_int0_flag();
-        sleep_enter_power_down_mode();
-    }
+    ///* Used by long press */
+    //__bit int0_flag = external_interrupts_get_int0_flag();
+    //if (1 == int0_flag)
+    //{
+    //    external_interrupts_reset_int0_flag();
+    //    sleep_enter_power_down_mode();
+    //}
 }
