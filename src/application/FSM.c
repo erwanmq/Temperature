@@ -1,13 +1,10 @@
-#include <8052.h>
 #include "application/FSM.h"
 
 #include "utils/stack.h"
 
-#include "drivers/at89c51rb2/timer/timer2.h"
-#include "drivers/at89c51rb2/sleep/sleep.h"
-#include "drivers/at89c51rb2/spi/spi.h"
-#include "drivers/at89c51rb2/external_interrupts/external_interrupts.h"
-#include "drivers/at89c51rb2/segments_display/segments_display.h"
+#include "hal/hal_timer.h"
+#include "hal/hal_spi.h"
+#include "hal/hal_display.h"
 
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
 
@@ -24,44 +21,24 @@ static st_fsm_context ctx = {
 
 static void fsm_transition_wait(unsigned int timeout_ms, en_fsm_state next_state)
 {
-    ctx.wait_counter = 0;
-    ctx.wait_target = timer2_ms_to_counter(timeout_ms);
+    ctx.wait_timeout = timeout_ms;
     ctx.next_state = next_state;
-
     ctx.current_state = FSM_STATE_WAIT;
-
-    timer2_reset_flag();
-    timer2_start_timer();
 }
 
 static void fsm_state_wait(void)
 {
-    /* Enter in Sleep mode and wait for next interrupt */
-    // Enter idle mode until next interrupt
-    sleep_enter_idle_mode();
-    // The CPU sleep here until next interrupt
-
-    __bit timer2_flag = timer2_get_flag();
-    if (1 == timer2_flag)
-    {
-        timer2_reset_flag();
-        P1_0 = !P1_0;
-        ctx.wait_counter++;
-        if (ctx.wait_counter >= ctx.wait_target)
-        {
-            ctx.current_state = ctx.next_state;
-            timer2_stop_timer();
-        }
-    }
+    hal_timer_sleep(ctx.wait_timeout);
+    ctx.current_state = ctx.next_state;
 }
 
 static void fsm_state_adc_sample(void)
 {
-    spi_set_SS_low();
+    hal_spi_acquire_bus();
     /* We need 3 SPI communication to retrieve all the ADC data */
     if (ctx.nb_adc_comm == 3)
     {
-        spi_set_SS_high();
+        hal_spi_release_bus();
         ctx.nb_adc_comm = 0;
 
         ctx.adc_samples[ctx.nb_acq] = ctx.adc_value;
@@ -78,28 +55,10 @@ static void fsm_state_adc_sample(void)
             fsm_transition_wait(5000, FSM_STATE_ADC_SAMPLE);
         }
     }
-    else if (0 == ctx.spi_performed)
+    else
     {
-        spi_send_data(0b00000001);
+        ctx.adc_value |= (hal_spi_transaction(0b00000001) << (8 * (ctx.nb_adc_comm - 1)));
         ctx.nb_adc_comm++;
-        ctx.spi_performed = 1;
-    }
-
-    __bit spi_flag = spi_get_flag();
-    en_spi_status spi_status = STATUS_OK;
-    if (1 == spi_flag)
-    {
-        spi_status = spi_get_status();
-        if (STATUS_OK != spi_status)
-        {
-            // Process error
-        }
-        else
-        {
-            ctx.adc_value |= (spi_read_data() << (8 * (ctx.nb_adc_comm - 1)));
-        }
-        spi_reset_flag();
-        ctx.spi_performed = 0; // Reset flag
     }
 
 }
@@ -117,26 +76,14 @@ static void fsm_state_calculate_mean(void)
     ctx.mean_sample = (unsigned char)mean_sample;
 
     /* Send the value to SPI */
-    spi_send_data(mean_sample);
-
-    static int test_nb = 0;
-    segments_display_write_first_digit(test_nb++);
-    if (test_nb > 9)
-    {
-        test_nb = 0;
-    }
+    hal_spi_transaction(mean_sample);
 
     fsm_transition_wait(10000, FSM_STATE_ADC_SAMPLE);
 }
 
 static void fsm_state_display(void)
 {
-    //char tens_digit = mean_sample / 10;
-    //char unit_digit = mean_sample - tens_digit;
-    char first = 2;
-    char second = 3;
-    segments_display_write_first_digit(first);
-    segments_display_write_second_digit(second);
+    hal_display_print_nb(23);
 }
 
 void FSM_update(void)

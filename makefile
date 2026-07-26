@@ -13,6 +13,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/drivers/at89c51rb2/sleep/sleep.c \
        $(SRC_DIR)/drivers/at89c51rb2/external_interrupts/external_interrupts.c \
        $(SRC_DIR)/drivers/at89c51rb2/segments_display/segments_display.c \
+       $(SRC_DIR)/hal/at89c51rb2/hal_display.c \
+       $(SRC_DIR)/hal/at89c51rb2/hal_timer.c \
+       $(SRC_DIR)/hal/at89c51rb2/hal_spi.c \
        $(SRC_DIR)/application/FSM.c \
        $(SRC_DIR)/utils/stack.c
 

@@ -1,5 +1,6 @@
 #include <8052.h>
-#include "drivers/at89c51rb2/timer/timer2.h"
+
+#include "hal/hal_timer.h"
 #include "drivers/at89c51rb2/sleep/sleep.h"
 #include "drivers/at89c51rb2/spi/spi.h"
 #include "drivers/at89c51rb2/external_interrupts/external_interrupts.h"
@@ -15,13 +16,10 @@ void main(void)
     EA = 1; // Enable interrupts
 
     /* Init drivers */
-    timer2_init(TIMER_FREQ);
-    spi_init();
+    hal_timer_init();
+    hal_display_init();
     external_interrupts_init_int1();
     external_interrupts_init_int0();
-    segments_display_init();
-
-    timer2_start_timer();
 
     while(1)
     {

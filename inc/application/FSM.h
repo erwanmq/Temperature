@@ -16,15 +16,12 @@ typedef struct FSM_Context
     en_fsm_state next_state;
 
     /* WAIT context variables */
-    unsigned int wait_target;
-    unsigned int wait_counter;
-
+    unsigned int wait_timeout;
 
     /* ADC context variables */
     unsigned char nb_adc_comm;
     unsigned short adc_value;
     unsigned char nb_acq;
-    unsigned char spi_performed;
 
     /* Calculate mean context variables */
     unsigned char adc_samples[4];
