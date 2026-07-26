@@ -6,6 +6,7 @@
 
 void hal_timer_init(void)
 {
+    EA = 1; // For the moment, I have to find its place.
     timer2_init(TIMER_FREQ);
 }
 

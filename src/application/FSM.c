@@ -5,15 +5,9 @@
 #include "hal/hal_timer.h"
 #include "hal/hal_spi.h"
 #include "hal/hal_display.h"
+#include "hal/hal_adc.h"
 
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
-
-static void (*fsm_callback[])(void) = {
-    [FSM_STATE_WAIT] = fsm_state_wait,
-    [FSM_STATE_ADC_SAMPLE] = fsm_state_adc_sample,
-    [FSM_STATE_CALCULATE_MEAN] = fsm_state_calculate_mean,
-    [FSM_STATE_DISPLAY] = fsm_state_display,
-};
 
 static st_fsm_context ctx = {
     .current_state = FSM_STATE_ADC_SAMPLE,
@@ -78,13 +72,21 @@ static void fsm_state_calculate_mean(void)
     /* Send the value to SPI */
     hal_spi_transaction(mean_sample);
 
-    fsm_transition_wait(10000, FSM_STATE_ADC_SAMPLE);
+    fsm_transition_wait(0, FSM_STATE_DISPLAY);
 }
 
 static void fsm_state_display(void)
 {
-    hal_display_print_nb(23);
+    hal_display_print_nb(ctx.mean_sample);
+    fsm_transition_wait(1000, FSM_STATE_ADC_SAMPLE);
 }
+
+static void (*fsm_callback[])(void) = {
+    [FSM_STATE_WAIT] = fsm_state_wait,
+    [FSM_STATE_ADC_SAMPLE] = fsm_state_adc_sample,
+    [FSM_STATE_CALCULATE_MEAN] = fsm_state_calculate_mean,
+    [FSM_STATE_DISPLAY] = fsm_state_display,
+};
 
 void FSM_update(void)
 {
