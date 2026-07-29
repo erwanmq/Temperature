@@ -28,33 +28,18 @@ static void fsm_state_wait(void)
 
 static void fsm_state_adc_sample(void)
 {
-    hal_spi_acquire_bus();
-    /* We need 3 SPI communication to retrieve all the ADC data */
-    if (ctx.nb_adc_comm == 3)
+    ctx.adc_samples[ctx.nb_acq] = adc_read_value();
+    ctx.nb_acq++;
+
+    if (ctx.nb_acq > 3)
     {
-        hal_spi_release_bus();
-        ctx.nb_adc_comm = 0;
-
-        ctx.adc_samples[ctx.nb_acq] = ctx.adc_value;
-        ctx.adc_value = 0;
-        ctx.nb_acq++;
-
-        if (3 == ctx.nb_acq)
-        {
-            ctx.current_state = FSM_STATE_CALCULATE_MEAN;
-            ctx.nb_acq = 0;
-        }
-        else
-        {
-            fsm_transition_wait(5000, FSM_STATE_ADC_SAMPLE);
-        }
+        ctx.current_state = FSM_STATE_CALCULATE_MEAN;
+        ctx.nb_acq = 0;
     }
     else
     {
-        ctx.adc_value |= (hal_spi_transaction(0b00000001) << (8 * (ctx.nb_adc_comm - 1)));
-        ctx.nb_adc_comm++;
+        fsm_transition_wait(5000, FSM_STATE_ADC_SAMPLE);
     }
-
 }
 
 static void fsm_state_calculate_mean(void)

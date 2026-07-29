@@ -19,8 +19,6 @@ typedef struct FSM_Context
     unsigned int wait_timeout;
 
     /* ADC context variables */
-    unsigned char nb_adc_comm;
-    unsigned short adc_value;
     unsigned char nb_acq;
 
     /* Calculate mean context variables */
