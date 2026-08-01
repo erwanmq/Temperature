@@ -2,6 +2,8 @@
 
 #include "hal/hal_spi.h"
 
+#include <8052.h>
+
 void hal_spi_init(void)
 {
     spi_init();
@@ -18,24 +20,25 @@ uint8_t hal_spi_transaction(uint8_t data)
         spi_flag = spi_get_flag();
     } while (spi_flag != 1);
 
-    en_spi_status spi_status = STATUS_OK;
-    if (1 == spi_flag)
+    en_spi_status spi_status = spi_get_status();
+    if (STATUS_OK != spi_status)
     {
-        spi_status = spi_get_status();
-        if (STATUS_OK != spi_status)
-        {
-            // Process error
-        }
-        else
-        {
-            data_received = spi_read_data();
-        }
+        // Process error
     }
+    else
+    {
+        data_received = spi_read_data();
+    }
+
     spi_reset_flag();
+
+    return data_received;
 }
 
 void hal_spi_acquire_bus(void)
 {
+    spi_reset_flag();
+    spi_read_data();
     spi_set_SS_low();
 }
 

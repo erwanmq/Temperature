@@ -7,6 +7,8 @@
 #include "hal/hal_display.h"
 #include "hal/hal_adc.h"
 
+#include <8052.h>
+
 #define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
 
 static st_fsm_context ctx = {
@@ -28,8 +30,10 @@ static void fsm_state_wait(void)
 
 static void fsm_state_adc_sample(void)
 {
+    P1_0 = 1;
     ctx.adc_samples[ctx.nb_acq] = adc_read_value();
     ctx.nb_acq++;
+    P1_0 = 0;
 
     if (ctx.nb_acq > 3)
     {

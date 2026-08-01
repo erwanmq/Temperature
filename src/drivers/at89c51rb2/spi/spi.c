@@ -11,7 +11,6 @@ __sfr __at (0xC4) SPSTA;
 __sfr __at (0xC5) SPDAT;
 
 static volatile __bit spi_flag = 0;
-static volatile __bit active_flag = 0;
 void spi_isr(void) __interrupt(9)
 {
     spi_flag = 1;
@@ -21,7 +20,7 @@ void spi_isr(void) __interrupt(9)
 void spi_init(void)
 {
     // Master mode, FCLK/2, Mode 0
-    SPCON = 0x30; 
+    SPCON = 0x30;
 
     IEN1 |= 0x04; // Set SPI interrupt
     SPCON |= 0x40; // Enable SPI
@@ -46,14 +45,12 @@ void spi_set_SS_low(void)
 {
     // Make SS low
     P1_2 = 0;
-    active_flag = 1;
 }
 
 void spi_set_SS_high(void)
 {
     // Make SS high
     P1_2 = 1;
-    active_flag = 0;
 }
 
 unsigned char spi_read_data(void)

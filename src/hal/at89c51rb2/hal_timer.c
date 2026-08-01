@@ -1,12 +1,12 @@
 #include "drivers/at89c51rb2/timer/timer2.h"
 #include "drivers/at89c51rb2/sleep/sleep.h"
 #include "hal/hal_timer.h"
+#include <8052.h>
 
 #define TIMER_FREQ 100 // 100Hz -- 10ms resolution
 
 void hal_timer_init(void)
 {
-    EA = 1; // For the moment, I have to find its place.
     timer2_init(TIMER_FREQ);
 }
 
@@ -17,8 +17,7 @@ void hal_timer_sleep(uint16_t timeout_ms)
     const uint16_t counter_wanted = (uint16_t)(timer2_ms_to_counter(timeout_ms));
     timer2_start_timer();
 
-    // Avoid blocking indefinetely here
-    while (0 == counter)
+    while (counter < counter_wanted)
     {
         sleep_enter_idle_mode();
 
@@ -27,10 +26,6 @@ void hal_timer_sleep(uint16_t timeout_ms)
         {
             timer2_reset_flag();
             counter++;
-            if (counter == counter_wanted)
-            {
-                counter = 0;
-            }
         }
         timer2_reset_flag();
     }
