@@ -1,15 +1,11 @@
 #include "application/FSM.h"
 
-#include "utils/stack.h"
-
 #include "hal/hal_timer.h"
 #include "hal/hal_spi.h"
 #include "hal/hal_display.h"
 #include "hal/hal_adc.h"
 
-#include <8052.h>
-
-#define TIMER_BEFORE_FETCH 100 // 1/100 * 100 = 1000 ms
+#include "utils/debug_gpio.h"
 
 static st_fsm_context ctx = {
     .current_state = FSM_STATE_ADC_SAMPLE,
@@ -30,10 +26,10 @@ static void fsm_state_wait(void)
 
 static void fsm_state_adc_sample(void)
 {
-    P1_0 = 1;
+    GPIO_DEBUG_TOGGLE();
     ctx.adc_samples[ctx.nb_acq] = adc_read_value();
     ctx.nb_acq++;
-    P1_0 = 0;
+    GPIO_DEBUG_TOGGLE();
 
     if (ctx.nb_acq > 3)
     {
@@ -48,7 +44,10 @@ static void fsm_state_adc_sample(void)
 
 static void fsm_state_calculate_mean(void)
 {
-    unsigned short mean_sample = 0; // Short - 2 bytes to contains the addition of 4 char - 1 byte
+    uint16_t mean_sample = 0; // 2 bytes to contains the addition of 4 uint8_t
+    GPIO_DEBUG_TOGGLE();
+    GPIO_DEBUG_TOGGLE();
+    GPIO_DEBUG_TOGGLE();
     for (int i = 0; i < sizeof(ctx.adc_samples)/sizeof(ctx.adc_samples[0]); i++)
     {
         mean_sample += ctx.adc_samples[i];
@@ -58,14 +57,16 @@ static void fsm_state_calculate_mean(void)
 
     ctx.mean_sample = (unsigned char)mean_sample;
 
-    /* Send the value to SPI */
-    hal_spi_transaction(mean_sample);
-
-    fsm_transition_wait(0, FSM_STATE_DISPLAY);
+    fsm_transition_wait(1000, FSM_STATE_DISPLAY);
 }
 
 static void fsm_state_display(void)
 {
+    GPIO_DEBUG_TOGGLE();
+    GPIO_DEBUG_TOGGLE();
+    GPIO_DEBUG_TOGGLE();
+    GPIO_DEBUG_TOGGLE();
+
     hal_display_print_nb(ctx.mean_sample);
     fsm_transition_wait(1000, FSM_STATE_ADC_SAMPLE);
 }

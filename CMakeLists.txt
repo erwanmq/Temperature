@@ -41,7 +41,6 @@ if(TARGET_PLATFORM STREQUAL "linux")
         ${SRC_DIR}/hal/linux/hal_spi.c
         ${SRC_DIR}/hal/linux/hal_adc.c
     )
-
 elseif(TARGET_PLATFORM STREQUAL "at89c51rb2")
 
     message(STATUS "Building for AT89C51RB2")
@@ -60,7 +59,6 @@ elseif(TARGET_PLATFORM STREQUAL "at89c51rb2")
         ${SRC_DIR}/drivers/at89c51rb2/mcp3008/mcp3008.c
         ${SRC_DIR}/utils/stack.c
     )
-
 else()
 
     message(FATAL_ERROR "Unknown platform: ${TARGET_PLATFORM}")
@@ -81,6 +79,19 @@ target_include_directories(${PROJECT_NAME}
         ${INC_DIR}
 )
 
+if(TARGET_PLATFORM STREQUAL "linux")
+
+    target_compile_definitions(${PROJECT_NAME}
+        PRIVATE
+            TARGET_LINUX
+    )
+
+elseif(TARGET_PLATFORM STREQUAL "at89c51rb2")
+    target_compile_definitions(${PROJECT_NAME}
+        PRIVATE
+            TARGET_AT89C51RB2
+    )
+endif()
 #===============================================================================
 # SDCC specific
 #===============================================================================

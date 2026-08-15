@@ -2,5 +2,6 @@
 
 uint16_t adc_read_value(void)
 {
-    return 23;
+    static uint16_t random_value = 23;
+    return random_value++;
 }
